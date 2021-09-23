@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    volumes:
+      - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+    ports:
+      - "5438:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+  nginx:
+    depends_on:
+      - api
+      - client
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    ports:
+      - "3050:80"
+
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: "./server"
+    depends_on:
+      - postgres
+    volumes:
+      - /app/node_modules
+      - ./server:/app
+    environment:
+      POSTGRES_HOST_IP: postgres
+
+  client:
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    build:
+      dockerfile: Dockerfile
+      context: ./client
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+
+  adminer:
+      image: adminer:latest
+      restart: unless-stopped
+      ports:
+        - 8000:8080
+      depends_on:
+        - postgres
+      environment:
+        ADMINER_DEFAULT_SERVER: postgres
