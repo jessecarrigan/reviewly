@@ -1,89 +1,77 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import { Button, Container, Card, Row } from 'react-bootstrap';
+function App() {
+  const [reviews, setReviews] = useState([]);
+  const [bookName, setBookName] = useState('');
+  const [bookReview, setBookReview] = useState('');
+  const [reviewUpdate, setReviewUpdate] = useState('');
+  const [error, setError] = useState({});
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      setBookName: '',
-      setReview: '',
-      fetchData: [],
-      reviewUpdate: ''
-    }
-  }
-
-  handleBookReview = (event) => {
-    let name = event.target.name;
-    let value = event.target.value;
-    this.setState({
-      [name]: value
-    });
-  }
-
-  handleUpdateBookReview = (event) => {
-    this.setState({
-      reviewUpdate: event.target.value
-    });
-  }
-
-  componentDidMount() {
+  // Fetch reviews
+  useEffect(() => {
     axios.get('/api/reviews')
     .then((response) => {
-      this.setState({
-        fetchData: response.data
-      });
+      setReviews(response.data)
+    })
+    .catch(error => {
+      setError(error);
+    });
+  }, [setReviews]);
+
+  const submitReview = () => {
+    axios.post('/api/reviews', {
+      bookName: bookName,
+      bookReview: bookReview
+    })
+    .then(() => { 
+      window.alert('Successfully posted review')
+    })
+    .catch(error => {
+      setError(error);
     });
   };
 
-  submit = () => {
-    axios.post('/api/reviews', this.state)
-      .then(() => { window.alert('Successfully posted review')});
-    console.log(this.state);
-    document.location.reload();
-  }
-  
-  delete = (id) => {
+  const deleteReview = (id) => {
     if (window.confirm('Do you want to delete this review?')) {
       axios.delete(`/api/reviews/${id}`);
-      document.location.reload();
     }
-  }
-  
-  edit = (id) => {
-    axios.put(`/api/reviews/${id}`, this.state);
-    document.location.reload();
-  }
+  };
 
-  render() {
-    let card = this.state.fetchData.map((val, key) => {
-        return (
-            <React.Fragment>
-                <Card style={{ width: '18rem' }} className='m-2'>
-                    <Card.Body>
-                        <Card.Title>{val.book_name}</Card.Title>
-                        <Card.Text>
-                            {val.book_review}
-                        </Card.Text>
-                        <input name='reviewUpdate' onChange={this.handleUpdateBookReview} placeholder='Update Review' ></input>
-                        <Button className='m-2' onClick={() => { this.edit(val.id) }}>Update</Button>
-                        <Button onClick={() => { this.delete(val.id) }}>Delete</Button>
-                    </Card.Body>
-                </Card>
-            </React.Fragment>
+  const editReview = (id) => {
+    axios.put(`/api/reviews/${id}`, {
+      reviewUpdate: reviewUpdate
+    });
+  };
+
+  let card = reviews.map((val, key) => {
+    return (
+        <>
+            <Card style={{ width: '18rem' }} className='m-2'>
+                <Card.Body>
+                    <Card.Title>{val.book_name}</Card.Title>
+                    <Card.Text>
+                        {val.book_review}
+                    </Card.Text>
+                    <input name='reviewUpdate' onChange={setReviewUpdate} placeholder='Update Review' ></input>
+                    <Button className='m-2' onClick={() => { editReview(val.id) }}>Update</Button>
+                    <Button onClick={() => { deleteReview(val.id) }}>Delete</Button>
+                </Card.Body>
+            </Card>
+        </>
         )
-    })
-  
+    });    
+    
     return (
         <div className='App'>
             <h1>Reviewly</h1>
             <h2>Your home for book reviews</h2>
             <div className='form'>
-                <input name='setBookName' placeholder='Enter Book Name' onChange={this.handleBookReview} />
-                <input name='setReview' placeholder='Enter Review' onChange={this.handleBookReview} />
+                <input name='bookName' placeholder='Enter Book Name' onChange={setBookName} />
+                <input name='bookReview' placeholder='Enter Review' onChange={setBookReview} />
             </div>
-            <Button className='my-2' variant="primary" onClick={this.submit}>Submit</Button> <br /><br />
+            <Button className='my-2' variant="primary" onClick={submitReview}>Submit</Button> <br /><br />
             <Container>
                 <Row>
                     {card}
@@ -91,7 +79,6 @@ class App extends Component {
             </Container>
         </div>
     );
-  }
 }
 
 export default App;

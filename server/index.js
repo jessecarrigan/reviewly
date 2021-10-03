@@ -31,8 +31,8 @@ router.get('/reviews', async(context) => {
 
 // Create book review
 router.post('/reviews', Body(), async(context) => {
-    const book = context.request.body.setBookName;
-    const review = context.request.body.setReview;
+    const book = context.request.body.bookName;
+    const review = context.request.body.bookReview;
     const result = await Knex('books_reviews')
         .insert({book_name: book, book_review: review});
     console.log(result);
