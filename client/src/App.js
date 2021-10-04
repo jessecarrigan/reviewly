@@ -21,12 +21,18 @@ function App() {
   }, [setReviews]);
 
   const submitReview = () => {
-    axios.post('/api/reviews', {
+    const newReview = {
       bookName: bookName,
       bookReview: bookReview
-    })
-    .then(() => { 
+    };
+    axios.post('/api/reviews', newReview)
+    .then((response) => { 
+      console.log(response.data);
       window.alert('Successfully posted review')
+      axios.get('/api/reviews')
+      .then((response) => {
+        setReviews(response.data)
+      });
     })
     .catch(error => {
       setError(error);
@@ -35,13 +41,22 @@ function App() {
 
   const deleteReview = (id) => {
     if (window.confirm('Do you want to delete this review?')) {
-      axios.delete(`/api/reviews/${id}`);
+      axios.delete(`/api/reviews/${id}`)
+      .then(() => setReviews(reviews.filter((review) => {
+        return review.id !== id;
+      })));
     }
   };
 
   const editReview = (id) => {
     axios.put(`/api/reviews/${id}`, {
       reviewUpdate: reviewUpdate
+    })
+    .then(() => {
+      axios.get('/api/reviews')
+      .then((response) => {
+        setReviews(response.data)
+      })
     });
   };
 
