@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 import { Button, Container, Card, Row } from 'react-bootstrap';
@@ -54,7 +54,7 @@ function App() {
                     <Card.Text>
                         {val.book_review}
                     </Card.Text>
-                    <input name='reviewUpdate' onChange={setReviewUpdate} placeholder='Update Review' ></input>
+                    <input name='reviewUpdate' onChange={e => setReviewUpdate(e.target.value)} placeholder='Update Review' ></input>
                     <Button className='m-2' onClick={() => { editReview(val.id) }}>Update</Button>
                     <Button onClick={() => { deleteReview(val.id) }}>Delete</Button>
                 </Card.Body>
@@ -68,8 +68,8 @@ function App() {
             <h1>Reviewly</h1>
             <h2>Your home for book reviews</h2>
             <div className='form'>
-                <input name='bookName' placeholder='Enter Book Name' onChange={setBookName} />
-                <input name='bookReview' placeholder='Enter Review' onChange={setBookReview} />
+                <input name='bookName' placeholder='Enter Book Name' onChange={e => setBookName(e.target.value)} />
+                <input name='bookReview' placeholder='Enter Review' onChange={e => setBookReview(e.target.value)} />
             </div>
             <Button className='my-2' variant="primary" onClick={submitReview}>Submit</Button> <br /><br />
             <Container>

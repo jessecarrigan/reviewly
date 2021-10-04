@@ -53,7 +53,6 @@ router.delete('/reviews/:id', async(context) => {
 router.put('/reviews/:id', Body(), async(context) => {
     const id = context.params.id;
     const review = context.request.body.reviewUpdate;
-    console.log(`New Review: ${review}`);
     const result = await Knex('books_reviews')
         .where('id', '=', id)
         .update('book_review', review);
