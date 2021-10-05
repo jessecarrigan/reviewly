@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
-import { Button, Container, Card, Row } from 'react-bootstrap';
+import { Button, Container, Row } from 'react-bootstrap';
+import Reviews from './components/Reviews';
+
 function App() {
   const [reviews, setReviews] = useState([]);
   const [bookName, setBookName] = useState('');
@@ -20,19 +22,23 @@ function App() {
     });
   }, [setReviews]);
 
+  const getReviews = () => {
+    axios.get('/api/reviews')
+    .then((response) => {
+      setReviews(response.data);
+    });
+  };
+
   const submitReview = () => {
     const newReview = {
       bookName: bookName,
       bookReview: bookReview
     };
+
     axios.post('/api/reviews', newReview)
-    .then((response) => { 
-      console.log(response.data);
-      window.alert('Successfully posted review')
-      axios.get('/api/reviews')
-      .then((response) => {
-        setReviews(response.data)
-      });
+    .then(() => { 
+      window.alert('Successfully posted review');
+      getReviews();
     })
     .catch(error => {
       setError(error);
@@ -53,46 +59,26 @@ function App() {
       reviewUpdate: reviewUpdate
     })
     .then(() => {
-      axios.get('/api/reviews')
-      .then((response) => {
-        setReviews(response.data)
-      })
+      getReviews();
     });
   };
-
-  let card = reviews.map((val, key) => {
-    return (
-        <>
-            <Card style={{ width: '18rem' }} className='m-2'>
-                <Card.Body>
-                    <Card.Title>{val.book_name}</Card.Title>
-                    <Card.Text>
-                        {val.book_review}
-                    </Card.Text>
-                    <input name='reviewUpdate' onChange={e => setReviewUpdate(e.target.value)} placeholder='Update Review' ></input>
-                    <Button className='m-2' onClick={() => { editReview(val.id) }}>Update</Button>
-                    <Button onClick={() => { deleteReview(val.id) }}>Delete</Button>
-                </Card.Body>
-            </Card>
-        </>
-        )
-    });    
     
-    return (
-        <div className='App'>
-            <h1>Reviewly</h1>
-            <h2>Your home for book reviews</h2>
-            <div className='form'>
-                <input name='bookName' placeholder='Enter Book Name' onChange={e => setBookName(e.target.value)} />
-                <input name='bookReview' placeholder='Enter Review' onChange={e => setBookReview(e.target.value)} />
-            </div>
-            <Button className='my-2' variant="primary" onClick={submitReview}>Submit</Button> <br /><br />
-            <Container>
-                <Row>
-                    {card}
-                </Row>
-            </Container>
-        </div>
+  return (
+      <div className='App'>
+          <h1>Reviewly</h1>
+          <h2>Your home for book reviews</h2>
+          <span>{error.message}</span>
+          <div className='form'>
+              <input name='bookName' placeholder='Enter Book Name' onChange={e => setBookName(e.target.value)} />
+              <input name='bookReview' placeholder='Enter Review' onChange={e => setBookReview(e.target.value)} />
+          </div>
+          <Button className='my-2' variant="primary" onClick={submitReview}>Submit</Button> <br /><br />
+          <Container>
+              <Row>
+                  <Reviews reviews={reviews} updateReview={setReviewUpdate} deleteReview={deleteReview} editReview={editReview}/>
+              </Row>
+          </Container>
+      </div>
     );
 }
 
