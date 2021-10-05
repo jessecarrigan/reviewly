@@ -35,6 +35,8 @@ services:
       - ./server:/app
     environment:
       POSTGRES_HOST_IP: postgres
+    command:
+      npm run start
 
   client:
     stdin_open: true
@@ -46,6 +48,8 @@ services:
     volumes:
       - /app/node_modules
       - ./client:/app
+    command:
+      npm run start
 
   adminer:
       image: adminer:latest
